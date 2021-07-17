@@ -1,0 +1,103 @@
+#!perl
+
+# AUTHORITY
+# DATE
+# DIST
+# VERSION
+
+use strict;
+use warnings;
+use Getopt::Long;
+
+use NumSeq::Iter qw(numseq_iter);
+
+my %Opts = (
+    separator => "\n",
+    format => undef,
+);
+Getopt::Long::Configure('bundling', 'no_ignore_case',
+                        # because we want to allow negative numbers without error
+                        'pass_through',
+                    );
+GetOptions(
+    'help|h|?' => sub {
+        print <<'_';
+Usage: seq-numseq [options] <intrange>
+       seq-numseq --help, -h, -?
+       seq-numseq --version, -v
+
+Examples:
+  % seq-numseq 1,5-10,15
+
+Options:
+  --format=s, -f
+  --separator=s, -s
+
+_
+        exit 0;
+    },
+    'version|v' => sub {
+        no warnings 'once';
+        print "seq-numseq version ", ($main::VERSION || "dev"),
+            ($main::DATE ? " ($main::DATE)" : ""), "\n";
+        exit 0;
+    },
+    'format|f=s' => \$Opts{format},
+    'separator|s=s' => \$Opts{separator},
+);
+
+@ARGV == 1 or die "seq-numseq: Please specify numseq specification\n";
+my $format;
+my $iter = numseq_iter($ARGV[0]);
+
+while (defined (my $x = $iter->())) {
+    unless (defined $format) {
+        $format = $Opts{format};
+        if (!defined $format) {
+            $format = "%s";
+        }
+    }
+    printf "${format}%s", $x, $Opts{separator};
+}
+
+# ABSTRACT: Like seq, but accepts numseq specification (e.g. '1,3,5,...,101')
+# PODNAME:
+
+=head1 SYNOPSIS
+
+ % seq-numseq 1,3,5,...,101
+
+
+=head1 DESCRIPTION
+
+This variant of B<seq> accepts numseq specification (e.g. '1,3,5,...,101'). It
+allows you to implicitly specify increments/decrements or specify that geometric
+sequence instead of arithmetic one.
+
+See L<NumSeq::Iter> for more details.
+
+
+=head1 OPTIONS
+
+=head2 --format=s, -f
+
+=head2 --separator=s, -s
+
+=head2 --help, -h, -?
+
+=head2 --version
+
+
+=head1 SEE ALSO
+
+B<seq>, the Unix utility.
+
+Other seq variants or themes I've written: L<seq-intrange> (from
+L<App::seq::intrange>), L<seq-pl> (from L<App::seq::pl>), L<dateseq> (from
+L<App::dateseq>) which can generate date sequences, including infinite ones,
+L<seq-pericmd> (from L<App::SeqPericmd>) which lets you customize increment/step
+(e.g. 0.5) or limit the number of items.
+
+L<Sah::Schema::NumSeq>, L<Regexp::Pattern::NumSeq>, L<NumSeq::Iter>.
+
+=cut
