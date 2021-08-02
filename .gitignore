@@ -2,3 +2,4 @@ App-seq-numseq-*
 .build
 *~
 nytprof*
+.DS_Store
